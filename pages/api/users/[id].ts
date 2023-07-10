@@ -1,20 +1,92 @@
 import { NextApiHandler } from "next";
-import { Users } from "@/utils/users";
+import prisma from "@/libs/prisma";
 
-const handler: NextApiHandler = (req, res) =>{
-    //req é o vem da url
+//LER
+const handlerGet: NextApiHandler = async (req, res) =>{
     // id vem da url api/users/[id]
     const {id} = req.query;
+    const user = await prisma.user.findUnique({
+        where:{
+            id: parseInt(id as string)
+        }
+    })
+    if(user){
+        res.json({user})
+        return
+    }
+    res.json({error: 'Usuario não encontrado!'})
+}
 
-    //verifica se se o id do req tem no Users, se tiver ja retorna, senão retora notfoun
-    for(let i in Users) {
-        if(Users[i].id.toString() === id){
-            res.json(Users[i])
-            return;
+//ATUALIZAR
+const handlerPut: NextApiHandler = async (req, res) =>{
+    const {name, active} = req.body;
+    const {id} = req.query;
+
+    let data:{
+        name?: string
+        active? :boolean
+    } = {};
+
+    if(name){
+        data.name = name
+    }
+    if(active) {
+        switch(active) {
+            case 'true':
+            case '1':
+                data.active = true
+                break;
+            case 'false':
+            case '0':
+                data.active = false
+                break;
         }
     }
 
-    res.json({error: 'NotFound'})
+    const updateUser = await prisma.user.update({
+        where: {
+            id: parseInt(id as string)
+        },
+        data
+    });
+    if(updateUser){
+        res.json({updateUser})
+        return
+    }
+    res.json({error: 'Algo deu errado!'})
+}
+
+
+const handlerDelete: NextApiHandler = async (req, res) =>{
+    const {id} = req.query;
+    const deleteUser = await prisma.user.delete({
+        where: {
+            id: parseInt(id as string)
+        }
+    })
+    .catch(()=>{
+        res.json({error: "usuario não encontrado!"})
+    })
     
+    if(deleteUser){
+        res.status(200).json({status: 'deletado'})
+    }
+}
+
+
+
+
+const handler: NextApiHandler = async (req,res) =>{
+    switch(req.method){
+        case 'GET':
+            handlerGet(req,res);
+            break
+        case 'PUT': 
+            handlerPut(req,res);
+            break
+        case 'DELETE': 
+            handlerDelete(req,res);
+            break
+    }
 }
 export default handler;
