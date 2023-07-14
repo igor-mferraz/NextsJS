@@ -8,7 +8,14 @@ const handlerGet: NextApiHandler = async (req, res) =>{
     const user = await prisma.user.findUnique({
         where:{
             id: parseInt(id as string)
+        },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true
         }
+    
     })
     if(user){
         res.json({user})
@@ -90,3 +97,31 @@ const handler: NextApiHandler = async (req,res) =>{
     }
 }
 export default handler;
+
+//const handlerGet: NextApiHandler = async (req, res) =>{
+    
+//     const {name} = req.query;
+//     const user = await prisma.user.findUnique({
+//         where:{
+//             name: {
+//                 //começa com b
+//                 startWith: "B",
+
+//                 //termina com a
+//                 endWith: "A"
+//        
+//             }
+//         },
+//         select: {
+//             id: true,
+//             name: true,
+//             email: true,
+//             role: true
+//         }
+//     })
+//     if(user){
+//         res.json({user})
+//         return
+//     }
+//     res.json({error: 'Usuario não encontrado!'})
+// }

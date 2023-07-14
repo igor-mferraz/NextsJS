@@ -7,8 +7,17 @@ const handleGet:NextApiHandler = async (req,res) => {
     const users = await prisma.user.findMany({
         //condições exemplo
         // where: {
-        //     active: true
+        //     active: trues
         // }
+        select:{
+            id: true,
+            name: true, 
+            active: true,
+            email: true
+        },
+        orderBy:{
+            id: "asc"
+        }
     })
     res.json({users})
 }
